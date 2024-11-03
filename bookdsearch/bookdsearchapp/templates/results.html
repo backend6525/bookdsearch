@@ -1,0 +1,34 @@
+<!-- bookdsearchapp/templates/bookdsearchapp/results.html -->
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Book Data Results</title>
+	</head>
+	<body>
+		<h2>Extracted Book Data</h2>
+		<table>
+			<tr>
+				<th>Title</th>
+				<th>Author</th>
+				<th>Genre</th>
+				<th>Tags</th>
+				<th>Image</th>
+			</tr>
+			{% for book in book_data %}
+			<tr>
+				<td>{{ book.title }}</td>
+				<td>{{ book.author }}</td>
+				<td>{{ book.genre }}</td>
+				<td>{{ book.tags }}</td>
+				<td>
+					<img
+						src="{{ book.image_url }}"
+						alt="Book Cover"
+						style="width: 100px; height: auto" />
+				</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</body>
+</html>
