@@ -47,10 +47,8 @@ from bs4 import BeautifulSoup
 #         if 'encrypted-tbn0.gstatic.com' not in img_url:  # Filter out low-res thumbnails
 #             return img_url
 #     return ''
-# bookdsearchapp/scraping_utils.py
+# bookdsearchapp/scraping_utils.pyf
 
-import requests
-from bs4 import BeautifulSoup
 import time
 
 def fetch_book_data_open_library(title, author):

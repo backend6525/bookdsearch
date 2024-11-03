@@ -8,7 +8,7 @@ from .forms import UploadFileForm
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from .scraping_utils import fetch_book_data_google, fetch_high_res_image
+
 
 # def scrape_book_data(title, author):
 #     # Placeholder function for scraping or using an API for genres, tags, and images
