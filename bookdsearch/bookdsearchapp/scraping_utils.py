@@ -88,22 +88,22 @@ def fetch_book_data_goodreads(title, author):
         print(f"Goodreads Error: {e}")
         return 'Unknown', [], ''
 
-def fetch_book_data_amazon(title, author):
-    """Scrape book metadata from Amazon (example placeholder)."""
-    try:
-        search_url = f"https://www.amazon.com/s?k={title}+{author}"
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(search_url, headers=headers)
-        soup = BeautifulSoup(response.text, 'html.parser')
+# def fetch_book_data_amazon(title, author):
+#     """Scrape book metadata from Amazon (example placeholder)."""
+#     try:
+#         search_url = f"https://www.amazon.com/s?k={title}+{author}"
+#         headers = {'User-Agent': 'Mozilla/5.0'}
+#         response = requests.get(search_url, headers=headers)
+#         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Amazon blocks bots aggressively; actual parsing might be challenging
-        genre = 'Unknown'
-        image_url = ''  # Replace with actual parsing
+#         # Amazon blocks bots aggressively; actual parsing might be challenging
+#         genre = 'Unknown'
+#         image_url = ''  # Replace with actual parsing
 
-        return genre, ['Unknown'], image_url
-    except Exception as e:
-        print(f"Amazon Error: {e}")
-        return 'Unknown', [], ''
+#         return genre, ['Unknown'], image_url
+#     except Exception as e:
+#         print(f"Amazon Error: {e}")
+#         return 'Unknown', [], ''
 
 def scrape_book_data(title, author):
     """Attempt to scrape book data from multiple sources."""
