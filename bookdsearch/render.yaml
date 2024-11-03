@@ -9,13 +9,13 @@ services:
     startCommand: "gunicorn your_project_name.wsgi:application"
     envVars:
       - key: SECRET_KEY
-        value: YOUR_SECRET_KEY
+        value: SECRET_KEY
       - key: DEBUG
         value: "False"
-      - key: CLOUDINARY_CLOUD_NAME
-        value: YOUR_CLOUDINARY_CLOUD_NAME
-      - key: CLOUDINARY_API_KEY
-        value: YOUR_CLOUDINARY_API_KEY
-      - key: CLOUDINARY_API_SECRET
-        value: YOUR_CLOUDINARY_API_SECRET
+      - key: CLOUD_NAME
+        value: CLOUD_NAME
+      - key: API_KEY
+        value: API_KEY
+      - key: API_SECRET
+        value: API_SECRET
       # Add DATABASE_URL or other necessary variables here
