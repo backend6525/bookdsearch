@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -85,5 +85,80 @@
 					.catch((error) => console.error("Error:", error));
 			}
 		</script>
+	</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Display Book Data</title>
+	</head>
+	<body>
+		<h2>Uploaded Book Data</h2>
+		<form method="post" action="{% url 'scrape_data' %}">
+			{% csrf_token %}
+			<table>
+				<thead>
+					<tr>
+						<th>Title</th>
+						<th>Author</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for book in book_data %}
+					<tr>
+						<td>{{ book.title }}</td>
+						<td>{{ book.author }}</td>
+						<input
+							type="hidden"
+							name="book_data[]"
+							value="{{ book.title }}|{{ book.author }}" />
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			<label for="website_url">Enter Website URL:</label>
+			<input
+				type="text"
+				id="website_url"
+				name="website_url"
+				placeholder="https://example.com" />
+			<button type="submit">Scrape</button>
+		</form>
+
+		{% if scraped_data %}
+		<h2>Scraped Data</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>Title</th>
+					<th>Author</th>
+					<th>Genre</th>
+					<th>Tags</th>
+					<th>Image</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for book in scraped_data %}
+				<tr>
+					<td>{{ book.title }}</td>
+					<td>{{ book.author }}</td>
+					<td>{{ book.genre }}</td>
+					<td>{{ book.tags }}</td>
+					<td><img src="{{ book.image_url }}" alt="Cover Image" /></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<form method="post" action="{% url 'save_data' %}">
+			{% csrf_token %} {% for book in scraped_data %}
+			<input
+				type="hidden"
+				name="scraped_data[]"
+				value="{{ book.title }}|{{ book.author }}|{{ book.genre }}|{{ book.tags }}|{{ book.image_url }}" />
+			{% endfor %}
+			<button type="submit">Save</button>
+		</form>
+		{% endif %}
 	</body>
 </html>
