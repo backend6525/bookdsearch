@@ -9,7 +9,7 @@ import json
 import time
 logger = logging.getLogger(__name__)
 
-
+@csrf_exempt
 def scrape_data(request):
     if request.method == 'POST':
         try:
