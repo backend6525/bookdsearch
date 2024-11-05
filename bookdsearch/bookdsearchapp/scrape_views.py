@@ -63,23 +63,55 @@ def scrape_data(request):
 
 
 @csrf_exempt
+# def save_data(request):
+#     if request.method == 'POST':
+#         try:
+#             scraped_data = request.POST.getlist('scraped_data[]')
+#             data = []
+
+#             for book in scraped_data:
+#                 parts = book.split('|', 4)
+#                 if len(parts) != 5:
+#                     raise ValueError(f"Invalid scraped data format: {book}")
+#                 title, author, genre, tags, image_url = parts
+#                 data.append({
+#                     'Title': title,
+#                     'Author': author,
+#                     'Genre': genre,
+#                     'Tags': tags,
+#                     'Image URL': image_url
+#                 })
+
+#             df = pd.DataFrame(data)
+#             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+#             response['Content-Disposition'] = 'attachment; filename=scraped_data.xlsx'
+#             df.to_excel(response, index=False, engine='openpyxl')
+
+#             return response
+#         except Exception as e:
+#             logger.error(f"Error saving data: {e}")
+#             logger.error(traceback.format_exc())
+#             return JsonResponse({'error': f'An error occurred while saving the data: {str(e)}'}, status=500)
+#     return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
 def save_data(request):
     if request.method == 'POST':
         try:
-            scraped_data = request.POST.getlist('scraped_data[]')
+            scraped_data = json.loads(request.POST.get('scraped_data', '[]'))
             data = []
 
             for book in scraped_data:
-                parts = book.split('|', 4)
-                if len(parts) != 5:
+                parts = book.split('|', 5)
+                if len(parts) != 6:
                     raise ValueError(f"Invalid scraped data format: {book}")
-                title, author, genre, tags, image_url = parts
+                title, author, genre, tags, image_url, error = parts
                 data.append({
                     'Title': title,
                     'Author': author,
                     'Genre': genre,
                     'Tags': tags,
-                    'Image URL': image_url
+                    'Image URL': image_url,
+                    'Error': error
                 })
 
             df = pd.DataFrame(data)
