@@ -31,5 +31,58 @@
 			{% endfor %}
 		</table>
 		<button type="button" onclick="scrapeData()">Scrape</button>
+		<button type="button" onclick="saveData()">Save</button>
+
+		<script>
+			function scrapeData() {
+				const form = document.getElementById("scrape-form");
+				const formData = new FormData(form);
+
+				fetch("{% url 'scrape_data' %}", {
+					method: "POST",
+					body: formData,
+					headers: {
+						"X-CSRFToken": formData.get("csrfmiddlewaretoken"),
+					},
+				})
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.error) {
+							alert(data.error);
+						} else {
+							const resultsDiv = document.getElementById("scraped-results");
+							resultsDiv.innerHTML = "<h2>Scraped Data</h2>";
+							data.scraped_data.forEach((book) => {
+								resultsDiv.innerHTML += `<p>Title: ${book.title}, Author: ${book.author}, Genre: ${book.genre}, Tags: ${book.tags}, <img src="${book.image_url}" alt="Cover Image"></p>`;
+							});
+						}
+					})
+					.catch((error) => console.error("Error:", error));
+			}
+
+			function saveData() {
+				const form = document.getElementById("scrape-form");
+				const formData = new FormData(form);
+
+				fetch("{% url 'save_data' %}", {
+					method: "POST",
+					body: formData,
+					headers: {
+						"X-CSRFToken": formData.get("csrfmiddlewaretoken"),
+					},
+				})
+					.then((response) => response.blob())
+					.then((blob) => {
+						const url = window.URL.createObjectURL(blob);
+						const a = document.createElement("a");
+						a.href = url;
+						a.download = "scraped_data.xlsx";
+						document.body.appendChild(a);
+						a.click();
+						a.remove();
+					})
+					.catch((error) => console.error("Error:", error));
+			}
+		</script>
 	</body>
 </html>
