@@ -1,17 +1,26 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from .forms import UploadFileForm
-
-
+import logging
 from django.views.decorators.csrf import csrf_exempt
 from .scraping_utils import scrape_book_data
-import logging
-from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
+traceback
 import traceback
 import pandas as pd
 
-logger = logging.getLogger(__name__)
+
+# logger = logging.getLogger(__name__)
+
+# @csrf_exempt
+# def upload_file(request):
+#     if request.method == 'POST':
+#         form = UploadFileForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             # Handle file upload here
+#             pass
+#     else:
+#         form = UploadFileForm()
+#     return render(request, 'bookdsearchapp/upload.html', {'form': form})
 
 # @csrf_exempt
 # def scrape_data(request):
@@ -81,16 +90,10 @@ logger = logging.getLogger(__name__)
 #             return JsonResponse({'error': f'An error occurred while saving the data: {str(e)}'}, status=500)
 #     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
-from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
-from .forms import UploadFileForm
-import pandas as pd
-import logging
-import traceback
-from django.views.decorators.csrf import csrf_exempt
-from .scraping_utils import scrape_book_data
 
-# logger = logging.getLogger(__name__)
+
+
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def upload_file(request):
