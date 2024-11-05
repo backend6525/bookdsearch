@@ -1,5 +1,5 @@
 <!-- bookdsearchapp/templates/bookdsearchapp/results.html -->
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -30,5 +30,39 @@
 			</tr>
 			{% endfor %}
 		</table>
+	</body>
+</html> -->
+<!-- bookdsearchapp/templates/bookdsearchapp/results.html -->
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Extracted Book Data</title>
+	</head>
+	<body>
+		<h2>Extracted Book Data</h2>
+		<table>
+			<tr>
+				<th>Title</th>
+				<th>Author</th>
+			</tr>
+			{% for book in book_data %}
+			<tr>
+				<td>{{ book.title }}</td>
+				<td>{{ book.author }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+
+		<!-- Scrap Button -->
+		<form method="post" action="{% url 'scrap_data' %}">
+			{% csrf_token %} {% for book in book_data %}
+			<input
+				type="hidden"
+				name="book_data[]"
+				value="{{ book.title }}|{{ book.author }}" />
+			{% endfor %}
+			<button type="submit">Scrap</button>
+		</form>
 	</body>
 </html>
