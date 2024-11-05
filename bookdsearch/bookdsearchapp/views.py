@@ -101,7 +101,7 @@ def upload_file(request):
             pass
     else:
         form = UploadFileForm()
-    return render(request, 'upload.html', {'form': form})
+    return render(request, 'bookdsearchapp/upload.html', {'form': form})
 
 @csrf_exempt
 def scrape_data(request):
