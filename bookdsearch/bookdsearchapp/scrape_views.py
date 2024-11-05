@@ -10,7 +10,6 @@ import time
 logger = logging.getLogger(__name__)
 
 
-
 def scrape_data(request):
     if request.method == 'POST':
         try:
@@ -22,27 +21,27 @@ def scrape_data(request):
                     try:
                         parts = book.split('|', 1)
                         if len(parts) != 2:
-                            yield json.dumps({'error': f'Invalid book data format: {book}'})
+                            yield json.dumps({'error': f'Invalid book data format: {book}'}).strip()
                             continue
                         
                         title, author = parts
                         genre, tags, image_url = scrape_book_data(title, author, website_url)
                         
                         yield json.dumps({
-                            'title': title,
-                            'author': author,
-                            'genre': genre,
-                            'tags': tags,
-                            'image_url': image_url
-                        })
+                            'title': title.strip(),
+                            'author': author.strip(),
+                            'genre': genre.strip(),
+                            'tags': [tag.strip() for tag in tags],
+                            'image_url': image_url.strip()
+                        }).strip()
                     except Exception as e:
                         logger.error(f"Error processing book data: {e}")
                         logger.error(traceback.format_exc())
                         yield json.dumps({
-                            'title': book.split('|', 1)[0],
-                            'author': book.split('|', 1)[1] if len(book.split('|', 1)) > 1 else '',
-                            'error': str(e)
-                        })
+                            'title': book.split('|', 1)[0].strip(),
+                            'author': book.split('|', 1)[1].strip() if len(book.split('|', 1)) > 1 else '',
+                            'error': str(e).strip()
+                        }).strip()
 
             return StreamingHttpResponse(stream(), content_type="application/json")
         except Exception as e:
@@ -51,6 +50,47 @@ def scrape_data(request):
             return JsonResponse({'error': f'An error occurred while scraping the data: {str(e)}'}, status=500)
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
+# def scrape_data(request):
+#     if request.method == 'POST':
+#         try:
+#             book_data = request.POST.getlist('book_data[]')
+#             website_url = request.POST.get('website_url')
+
+#             def stream():
+#                 for book in book_data:
+#                     try:
+#                         parts = book.split('|', 1)
+#                         if len(parts) != 2:
+#                             yield json.dumps({'error': f'Invalid book data format: {book}'})
+#                             continue
+                        
+#                         title, author = parts
+#                         genre, tags, image_url = scrape_book_data(title, author, website_url)
+                        
+#                         yield json.dumps({
+#                             'title': title,
+#                             'author': author,
+#                             'genre': genre,
+#                             'tags': tags,
+#                             'image_url': image_url
+#                         })
+#                     except Exception as e:
+#                         logger.error(f"Error processing book data: {e}")
+#                         logger.error(traceback.format_exc())
+#                         yield json.dumps({
+#                             'title': book.split('|', 1)[0],
+#                             'author': book.split('|', 1)[1] if len(book.split('|', 1)) > 1 else '',
+#                             'error': str(e)
+#                         })
+
+#             return StreamingHttpResponse(stream(), content_type="application/json")
+#         except Exception as e:
+#             logger.error(f"Error scraping data: {e}")
+#             logger.error(traceback.format_exc())
+#             return JsonResponse({'error': f'An error occurred while scraping the data: {str(e)}'}, status=500)
+#     else:
+#         return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
 
 
