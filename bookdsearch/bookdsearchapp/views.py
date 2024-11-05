@@ -86,6 +86,7 @@
 #             logger.error(traceback.format_exc())
 #             return JsonResponse({'error': f'An error occurred while saving the data: {str(e)}'}, status=500)
 #     return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from .forms import UploadFileForm
