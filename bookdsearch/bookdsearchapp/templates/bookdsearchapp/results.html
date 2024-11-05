@@ -1,37 +1,38 @@
 <!-- bookdsearchapp/templates/bookdsearchapp/results.html -->
-<!-- <!DOCTYPE html>
+<!-- 
+<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<title>Book Data Results</title>
+		<title>Display Book Data</title>
 	</head>
 	<body>
-		<h2>Extracted Book Data</h2>
-		<table>
-			<tr>
-				<th>Title</th>
-				<th>Author</th>
-				<th>Genre</th>
-				<th>Tags</th>
-				<th>Image</th>
-			</tr>
-			{% for book in book_data %}
-			<tr>
-				<td>{{ book.title }}</td>
-				<td>{{ book.author }}</td>
-				<td>{{ book.genre }}</td>
-				<td>{{ book.tags }}</td>
-				<td>
-					<img
-						src="{{ book.image_url }}"
-						alt="Book Cover"
-						style="width: 100px; height: auto" />
-				</td>
-			</tr>
-			{% endfor %}
-		</table>
-		<button type="button" onclick="scrapeData()">Scrape</button>
-		<button type="button" onclick="saveData()">Save</button>
+		<h2>Uploaded Book Data</h2>
+		<form id="scrape-form" method="post">
+			{% csrf_token %}
+			<table>
+				<thead>
+					<tr>
+						<th>Title</th>
+						<th>Author</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for book in book_data %}
+					<tr>
+						<td>{{ book.title }}</td>
+						<td>{{ book.author }}</td>
+						<input
+							type="hidden"
+							name="book_data[]"
+							value="{{ book.title }}|{{ book.author }}" />
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			<button type="button" onclick="scrapeData()">Scrape</button>
+			<button type="button" onclick="saveData()">Save</button>
+		</form>
 
 		<div id="scraped-results"></div>
 
@@ -99,11 +100,15 @@
 		<h2>Uploaded Book Data</h2>
 		<form id="scrape-form" method="post">
 			{% csrf_token %}
-			<table>
+			<table id="book-data-table">
 				<thead>
 					<tr>
 						<th>Title</th>
 						<th>Author</th>
+						<th>Genre</th>
+						<th>Tags</th>
+						<th>Image URL</th>
+						<th>Error</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -111,6 +116,14 @@
 					<tr>
 						<td>{{ book.title }}</td>
 						<td>{{ book.author }}</td>
+						<td></td>
+						<!-- Genre column -->
+						<td></td>
+						<!-- Tags column -->
+						<td></td>
+						<!-- Image URL column -->
+						<td></td>
+						<!-- Error column -->
 						<input
 							type="hidden"
 							name="book_data[]"
@@ -137,19 +150,56 @@
 						"X-CSRFToken": formData.get("csrfmiddlewaretoken"),
 					},
 				})
-					.then((response) => response.json())
-					.then((data) => {
-						if (data.error) {
-							alert(data.error);
-						} else {
-							const resultsDiv = document.getElementById("scraped-results");
-							resultsDiv.innerHTML = "<h2>Scraped Data</h2>";
-							data.scraped_data.forEach((book) => {
-								resultsDiv.innerHTML += `<p>Title: ${book.title}, Author: ${book.author}, Genre: ${book.genre}, Tags: ${book.tags}, <img src="${book.image_url}" alt="Cover Image"></p>`;
+					.then((response) => {
+						const reader = response.body.getReader();
+						const decoder = new TextDecoder();
+						let buffer = "";
+
+						reader.read().then(function processText({ done, value }) {
+							if (done) {
+								console.log("Stream complete");
+								return;
+							}
+
+							buffer += decoder.decode(value, { stream: true });
+							const lines = buffer.split("\n");
+							buffer = lines.pop(); // Keep the last partial line in the buffer
+
+							lines.forEach((line) => {
+								if (line.trim()) {
+									const data = JSON.parse(line);
+									appendToTable(data);
+								}
 							});
-						}
+
+							return reader.read().then(processText);
+						});
 					})
 					.catch((error) => console.error("Error:", error));
+			}
+
+			function appendToTable(data) {
+				const tableBody = document
+					.getElementById("book-data-table")
+					.querySelector("tbody");
+				data.forEach((item) => {
+					const rows = tableBody.querySelectorAll("tr");
+					rows.forEach((row) => {
+						const titleCell = row.cells[0];
+						const authorCell = row.cells[1];
+						if (
+							titleCell.textContent === item.title &&
+							authorCell.textContent === item.author
+						) {
+							row.cells[2].textContent = item.genre || "";
+							row.cells[3].textContent = item.tags ? item.tags.join(", ") : "";
+							row.cells[4].innerHTML = item.image_url
+								? `<img src="${item.image_url}" alt="Cover Image" width="50">`
+								: "";
+							row.cells[5].textContent = item.error || "";
+						}
+					});
+				});
 			}
 
 			function saveData() {
