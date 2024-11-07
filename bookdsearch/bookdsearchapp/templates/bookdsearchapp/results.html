@@ -1,6 +1,6 @@
 <!-- bookdsearchapp/templates/bookdsearchapp/results.html -->
 
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -29,13 +29,13 @@
 						<td>{{ book.title }}</td>
 						<td>{{ book.author }}</td>
 						<td></td>
-						<!-- Genre column -->
+						
 						<td></td>
-						<!-- Tags column -->
+					
 						<td></td>
-						<!-- Image URL column -->
+					
 						<td></td>
-						<!-- Error column -->
+						
 						<input
 							type="hidden"
 							name="book_data[]"
@@ -76,6 +76,167 @@
 							buffer += decoder.decode(value, { stream: true });
 							const lines = buffer.split("\n");
 							buffer = lines.pop(); // Keep the last partial line in the buffer
+
+							lines.forEach((line) => {
+								if (line.trim()) {
+									const data = JSON.parse(line);
+									appendToTable(data);
+								}
+							});
+
+							return reader.read().then(processText);
+						});
+					})
+					.catch((error) => console.error("Error:", error));
+			}
+
+			function appendToTable(data) {
+				const tableBody = document
+					.getElementById("book-data-table")
+					.querySelector("tbody");
+				data.forEach((item) => {
+					const rows = tableBody.querySelectorAll("tr");
+					rows.forEach((row) => {
+						const titleCell = row.cells[0];
+						const authorCell = row.cells[1];
+						if (
+							titleCell.textContent === item.title &&
+							authorCell.textContent === item.author
+						) {
+							row.cells[2].textContent = item.genre || "";
+							row.cells[3].textContent = item.tags ? item.tags.join(", ") : "";
+							row.cells[4].innerHTML = item.image_url
+								? `<img src="${item.image_url}" alt="Cover Image" width="50">`
+								: "";
+							row.cells[5].textContent = item.error || "";
+						}
+					});
+				});
+			}
+
+			function saveData() {
+				const table = document.getElementById("book-data-table");
+				const rows = table.querySelectorAll("tbody tr");
+				const scrapedData = [];
+
+				rows.forEach((row) => {
+					const title = row.cells[0].textContent.trim();
+					const author = row.cells[1].textContent.trim();
+					const genre = row.cells[2].textContent.trim();
+					const tags = row.cells[3].textContent.trim();
+					const imageUrl = row.cells[4].querySelector("img")
+						? row.cells[4].querySelector("img").src
+						: "";
+					const error = row.cells[5].textContent.trim();
+
+					scrapedData.push(
+						`${title}|${author}|${genre}|${tags}|${imageUrl}|${error}`
+					);
+				});
+
+				const formData = new FormData();
+				formData.append(
+					"csrfmiddlewaretoken",
+					document.querySelector("[name=csrfmiddlewaretoken]").value
+				);
+				formData.append("scraped_data", JSON.stringify(scrapedData));
+
+				fetch("{% url 'save_data' %}", {
+					method: "POST",
+					body: formData,
+				})
+					.then((response) => response.blob())
+					.then((blob) => {
+						const url = window.URL.createObjectURL(blob);
+						const a = document.createElement("a");
+						a.href = url;
+						a.download = "scraped_data.xlsx";
+						document.body.appendChild(a);
+						a.click();
+						a.remove();
+					})
+					.catch((error) => console.error("Error:", error));
+			}
+		</script>
+	</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Display Book Data</title>
+		{% load static %}
+		<link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	</head>
+	<body>
+		<div class="container">
+			<h2>Uploaded Book Data</h2>
+			<form id="scrape-form" method="post">
+				{% csrf_token %}
+				<table id="book-data-table">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>Author</th>
+							<th>Genre</th>
+							<th>Tags</th>
+							<th>Image URL</th>
+							<th>Error</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for book in book_data %}
+						<tr>
+							<td>{{ book.title }}</td>
+							<td>{{ book.author }}</td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<input
+								type="hidden"
+								name="book_data[]"
+								value="{{ book.title }}|{{ book.author }}" />
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				<div class="button-group">
+					<button type="button" onclick="scrapeData()">Scrape</button>
+					<button type="button" onclick="saveData()">Save</button>
+				</div>
+			</form>
+			<div id="scraped-results"></div>
+		</div>
+
+		<script>
+			function scrapeData() {
+				const form = document.getElementById("scrape-form");
+				const formData = new FormData(form);
+
+				fetch("{% url 'scrape_data' %}", {
+					method: "POST",
+					body: formData,
+					headers: {
+						"X-CSRFToken": formData.get("csrfmiddlewaretoken"),
+					},
+				})
+					.then((response) => {
+						const reader = response.body.getReader();
+						const decoder = new TextDecoder();
+						let buffer = "";
+
+						reader.read().then(function processText({ done, value }) {
+							if (done) {
+								console.log("Stream complete");
+								return;
+							}
+
+							buffer += decoder.decode(value, { stream: true });
+							const lines = buffer.split("\n");
+							buffer = lines.pop();
 
 							lines.forEach((line) => {
 								if (line.trim()) {
